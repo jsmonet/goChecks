@@ -5,8 +5,8 @@ import (
   "strings"
   "flag"
   "os"
-  // "io/ioutil"
-  // "net/http"
+  "io/ioutil"
+  "net/http"
 
 )
 
@@ -63,7 +63,7 @@ func main() {
   defer res.Body.Close()
   // read the body into 'body'
   rawBody, _ := ioutil.ReadAll(res.Body)
-  body := strings.ToLower(*rawBody)
+  body := strings.ToLower(string(rawBody))
 
   fmt.Println("debug: printing contents of 'body' variable", body)
 
