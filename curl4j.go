@@ -67,7 +67,7 @@ func main() {
 
   fmt.Println("debug: printing contents of 'body' variable", body)
 
-  if body != neo4jRole {
+  if body != "true" {
     fmt.Println("Warning: Neo4j Server currently set to wrong role. Role should be", neo4jRole)
     os.Exit(1)
   }
