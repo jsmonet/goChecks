@@ -28,9 +28,9 @@ func DiskUsage(path string) (disk DiskStatus) {
 
 func main() {
 
-  volumeArg := flag.String("volume", "/", "a FORMIDABLE string")
+  volumeArg := flag.String("volume", "/", "a FORMIDABLE string") // default to root
   sizeWarn := flag.Float64("warn", 75, "Enter a percentage, without the percent sign, of disk use below which you want the output to be WARN")
-  sizeCrit := flag.Float64("crit", 80, "Enter a percentage, without the percent sign, of disk use below which you want the output to be CRIT")
+  sizeCrit := flag.Float64("crit", 90, "Enter a percentage, without the percent sign, of disk use below which you want the output to be CRIT")
   flag.Parse()
   disk := DiskUsage(*volumeArg)
 
