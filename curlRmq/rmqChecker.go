@@ -10,7 +10,7 @@ import (
 )
 
 // Example curl:
-// curl --header 'Authorization: Basic Z3Vlc3Q6Z3Vlc3Q=' http://localhost:15672/api/healthchecks/node/rabbit@ip-172-31-27-58
+// curl --header 'Authorization: Basic Z3Vlc3Q6Z3Vlc3Q=' http://localhost:15672/api/healthchecks/node/rabbit@ip-169-254-27-13
 
 func main() {
 	rawHostAddress := flag.String("host", "localhost", "enter a host address or IP") // using fqdn depends on healthy DNS resolution
@@ -48,6 +48,6 @@ func main() {
 
 	// get the content and lowercase it as a string
 	rawBody, _ := ioutil.ReadAll(res.Body)
-	body := strings.ToLower(string(rawBody))
+	body := strings.ToLower(string(rawBody)) // this really should be parsing the json output of this curl instead of being so lazy
 	fmt.Println(body)
 }
