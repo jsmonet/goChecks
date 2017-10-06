@@ -5,34 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	// "os"
+	"os"
 	"strings"
 )
-
-// https://github.com/jmoiron/jsonq maybe consider using that library now that
-// I've accomplished the same thing after shuffling it all around slightly
-
-type healthValue struct {
-	Status []byte `json:"status"`
-}
-
-func getJson(curlTarget string) (hv healthValue) {
-	req, err := http.NewRequest("GET", curlTarget, nil)
-	if err != nil {
-		fmt.Println("Error:", err)
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println("Error at the defaultclient stage:", err)
-	}
-
-	defer res.Body.Close()
-	hv.Status, err = ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return
-}
 
 func main() {
 	rawCheckType := flag.String("type", "health", "Check type. Possible values are health, and nothing else right now")
@@ -55,13 +30,39 @@ func main() {
 		// _cat/health returns a simple one-liner with color-based
 		// health representation and some metrics
 		// way easier to mess with than json right now
-		curlUri = fmt.Sprintf("/_cluster/health")
+		curlUri = fmt.Sprintf("/_cat/health")
 	}
 
-	curlTargetLower := fmt.Sprintf("http://%v:9200%v", hostAddress, curlUri)
+	curlTarget := fmt.Sprintf("http://%v:9200%v", hostAddress, curlUri)
 	// debug: let's see what we've got so far
-	// fmt.Println(curlTargetLower)
-	healthOutput := getJson(curlTargetLower)
+	// fmt.Println(curlTarget)
 
-	fmt.Println(string(healthOutput.Status[3:15])) // haahahahaa oh my I can just leave this and be the worst person in history
+	req, err := http.NewRequest("GET", curlTarget, nil)
+	if err != nil {
+		fmt.Println("something went wrong", err)
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	defer res.Body.Close() // just so I don't forget to close it
+
+	rawBody, _ := ioutil.ReadAll(res.Body)
+	body := strings.ToLower(string(rawBody))
+	bodyWords := strings.Fields(body)
+
+	// debug: pring out body
+	// fmt.Println(body)
+	// fmt.Println(bodyWords[3])
+	if bodyWords[3] == "green" {
+		fmt.Println("OK, the cluster health is", bodyWords[3])
+		os.Exit(0)
+	} else if bodyWords[3] == "yellow" {
+		fmt.Println("Warning, cluster health is", bodyWords[3])
+	} else if bodyWords[3] == "red" {
+		fmt.Println("Critical, cluster health is,", bodyWords[3])
+	}
+
 }

@@ -17,8 +17,8 @@ import (
 // like, you know, POC to prod without any changes ftw
 
 func main() {
-	rawHostAddress := flag.String("host", "", "enter a host address or IP") // using fqdn relies on faithful DNS resolution
-	rawNeo4jRole := flag.String("role", "master", "enter master or slave")  // Neo4j HA cluster has 3 roles: master, slave, arbiter. We won't test for the latter
+	rawHostAddress := flag.String("host", "localhost", "enter a host address or IP") // using fqdn relies on faithful DNS resolution
+	rawNeo4jRole := flag.String("role", "master", "enter master or slave")           // Neo4j HA cluster has 3 roles: master, slave, arbiter. We won't test for the latter
 	rawFlagAuthContent := flag.String("auth", "", "enter JUST the base64-encoded auth content. We will add the rest for you. Example: aaAaaaAAaaaAbbbBb678bV==")
 
 	flag.Parse() // parse those flags!
@@ -76,5 +76,8 @@ func main() {
 	if body != "true" {
 		fmt.Println("Warning: Neo4j Server currently set to wrong role. Role should be", neo4jRole)
 		os.Exit(1)
+	} else {
+		fmt.Println("OK - host matches expected role of", neo4jRole)
+		os.Exit(0)
 	}
 }
