@@ -1,13 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
-
-	"github.com/elgs/gojq"
 )
 
 // Example curl:
@@ -50,42 +49,24 @@ func main() {
 	}
 
 	rawBody, err := ioutil.ReadAll(res.Body)
-	body := string(rawBody) // this really should be parsing the json output of this curl instead of being so lazy
 
-	parsed, err := gojq.NewStringQuery(body)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	rawHealthCheckResult, _ := parsed.Query("status")
-	if rawHealthCheckResult == "ok" {
-		fmt.Println("OK - all is well")
-		os.Exit(0)
-	} else {
-		fmt.Println("Critical - ", rawHealthCheckResult)
-	}
-	fmt.Println(rawHealthCheckResult)
-
-	// get the content and lowercase it as a string
-
-	// fmt.Println(body)
-
-	// type Hr struct {
-	// 	Status string `json:"status"`
-	// }
-	// type Info map[string]Hr
-
-	// dec := json.NewDecoder(strings.NewReader(string(rawBody)))
-
-	// var m Info
-	// if err := dec.Decode(&m); err == io.EOF {
-	// 	fmt.Println(err)
-	// } else if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Printf("%s", m["status"].Status)
-
-	// defer closing the session
 	defer res.Body.Close()
+
+	type Results struct {
+		Status string `json:"status"`
+	}
+
+	var results Results
+	marshalerr := json.Unmarshal(rawBody, &results)
+	if marshalerr != nil {
+		fmt.Println("error parsing:", marshalerr)
+	}
+	fmt.Println(results.Status)
+	comparableResult := string(results.Status)
+	if comparableResult == "ok" {
+		fmt.Println("yay")
+	} else {
+		fmt.Println("something went horribly wrong. apparently", comparableResult, "does not equal ok")
+	}
+
 }
