@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -18,8 +20,9 @@ func main() {
 	flag.Parse()
 
 	// if it.IsLegit? { return congratulations }
-	if *rawPortNumber < 1 || *rawPortNumber > 65535 {
-		fmt.Println("Enter a valid port number. You entered:", *rawPortNumber)
+	validPort, err := validatePort(*rawPortNumber)
+	if !validPort {
+		fmt.Println("Try using a valid port number between 1 and 65535. Thrown error:", err)
 		os.Exit(2)
 	}
 
@@ -28,12 +31,7 @@ func main() {
 
 	curlAddress := fmt.Sprintf("http://%v:%v/_cluster/health", *rawHostAddress, *rawPortNumber)
 
-	// debug
-	fmt.Println(curlAddress)
-
 	jsonBody := curlAndReturn(curlAddress)
-	// debug output. coding equiv of chimping your display on your dSLR
-	fmt.Println(string(jsonBody))
 
 	// set up the struct to parse the JSON
 	type Elascheck struct {
@@ -48,7 +46,17 @@ func main() {
 	if marshalerr != nil {
 		fmt.Println("You messed up bad:", marshalerr)
 	}
-	fmt.Println("status output:", elascheck.Status, "number of nodes:", elascheck.Numberofnodes, "and finally unassigned shards:", elascheck.Unassignedshards)
+	fmt.Println("status output:", elascheck.Status)
+	fmt.Println("number of nodes:", elascheck.Numberofnodes)
+	fmt.Println("and finally unassigned shards:", elascheck.Unassignedshards)
+
+	if strings.ToLower(elascheck.Status) == "green" && elascheck.Unassignedshards == 0 {
+		fmt.Println("OK - all is clear")
+		os.Exit(0)
+	} else {
+		fmt.Println("Critical - something is messed up") // some overcomplicated if/else if or case statement here
+		os.Exit(2)
+	}
 }
 
 func curlAndReturn(target string) []byte {
@@ -62,4 +70,14 @@ func curlAndReturn(target string) []byte {
 	defer esCurlRes.Body.Close()
 
 	return rawEsCurlBody
+}
+
+func validatePort(port int) (bool, error) {
+	if port < 1 || port > 65535 {
+		return false, errors.New("Port out of range")
+
+	}
+
+	return true, errors.New("no errors")
+
 }
