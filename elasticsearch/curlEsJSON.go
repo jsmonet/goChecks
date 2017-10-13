@@ -34,10 +34,12 @@ func main() {
 	jsonBody := curlAndReturn(curlAddress)
 
 	// set up the struct to parse the JSON
+	// changing the left value arbitrarily just to demonstrate to myself
+	// how unbound that is to the `json:"fieldname"` value. NBD, this should have been obv to me
 	type Elascheck struct {
-		Status           string `json:"status"`
-		Numberofnodes    int    `json:"number_of_nodes"`
-		Unassignedshards int    `json:"unassigned_shards"`
+		Stat     string `json:"status"`
+		Numnodes int    `json:"number_of_nodes"`
+		Unshards int    `json:"unassigned_shards"`
 	}
 	// and now we have a way of accessing it once we marshal the data
 	var elascheck Elascheck
@@ -46,11 +48,11 @@ func main() {
 	if marshalerr != nil {
 		fmt.Println("You messed up bad:", marshalerr)
 	}
-	fmt.Println("status output:", elascheck.Status)
-	fmt.Println("number of nodes:", elascheck.Numberofnodes)
-	fmt.Println("and finally unassigned shards:", elascheck.Unassignedshards)
+	fmt.Println("status output:", elascheck.Stat)
+	fmt.Println("number of nodes:", elascheck.Numnodes)
+	fmt.Println("and finally unassigned shards:", elascheck.Unshards)
 
-	if strings.ToLower(elascheck.Status) == "green" && elascheck.Unassignedshards == 0 {
+	if strings.ToLower(elascheck.Stat) == "green" && elascheck.Unshards == 0 {
 		fmt.Println("OK - all is clear")
 		os.Exit(0)
 	} else {
