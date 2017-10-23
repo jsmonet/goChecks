@@ -67,25 +67,5 @@ func main() {
 	}
 	fmt.Println(rawHealthCheckResult)
 
-	// get the content and lowercase it as a string
-
-	// fmt.Println(body)
-
-	// type Hr struct {
-	// 	Status string `json:"status"`
-	// }
-	// type Info map[string]Hr
-
-	// dec := json.NewDecoder(strings.NewReader(string(rawBody)))
-
-	// var m Info
-	// if err := dec.Decode(&m); err == io.EOF {
-	// 	fmt.Println(err)
-	// } else if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Printf("%s", m["status"].Status)
-
-	// defer closing the session
 	defer res.Body.Close()
 }
