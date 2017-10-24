@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// returns a byte slice from a curl target input
+// CurlAndReturn returns a byte slice from a curl target input
 func CurlAndReturn(target string) []byte {
 	curlTarget, curlErr := http.NewRequest("GET", target, nil)
 	if curlErr != nil {
@@ -24,9 +24,25 @@ func CurlAndReturn(target string) []byte {
 	return rawCurlBody
 }
 
+// Authcurl returns a byte slice from a curl with authentication
+func Authcurl(target string, auth string) []byte {
+	req, err := http.NewRequest("GET", target, nil)
+	if err != nil {
+		fmt.Println("req error:", err)
+	}
+	authString := fmt.Sprintf("Basic: %v", auth) // this doesn't jive with how I do neo curl
+	req.Header.Set("Authorization", authString)
+	res, _ := http.DefaultClient.Do(req)
+	rawCurlBody, _ := ioutil.ReadAll(res.Body)
+
+	defer res.Body.Close()
+
+	return rawCurlBody
+}
+
 // Checkport returns an int value to get tossed into os.Exit
 func Checkport(address string, port int, timeout int) (result int) {
-	result = 0 //explicitly zeroing
+	result = 0 // explicitly zeroing
 	target := fmt.Sprintf("%v:%v", address, port)
 	timeOutSeconds := time.Duration(timeout) * time.Second
 	conn, err := net.DialTimeout("tcp", target, timeOutSeconds)
@@ -40,7 +56,7 @@ func Checkport(address string, port int, timeout int) (result int) {
 
 // Checkneo returns a result int
 func Checkneo(address string, role string, auth string) (result int) {
-	result = 0 //explicitly zeroing
+	result = 0 // explicitly zeroing
 	target := fmt.Sprintf("http://%v:7474/db/manage/server/ha/%v", address, role)
 	req, _ := http.NewRequest("GET", target, nil) // I probably should catch an error here, but I don't really care about it right now
 	req.Header.Set("Authorization", auth)
@@ -58,14 +74,14 @@ func Checkneo(address string, role string, auth string) (result int) {
 	return result
 }
 
-// Checkes returns a result int and some strings
+// Elasjson returns a result int and some strings
 func Elasjson(jbody []byte) (result int, status string, nodes int, unshards int) {
 	type Elascheck struct {
 		Stat     string `json:"status"`
 		Numnodes int    `json:"number_of_nodes"`
 		Unshards int    `json:"unassigned_shards"`
 	}
-	result = 0 //explicitly zeroing
+	result = 0 // explicitly zeroing
 	var elascheck Elascheck
 	marshalerr := json.Unmarshal(jbody, &elascheck)
 	if marshalerr != nil {
@@ -80,4 +96,21 @@ func Elasjson(jbody []byte) (result int, status string, nodes int, unshards int)
 		result = 2
 	}
 	return result, status, nodes, unshards
+}
+
+// Rmqjson uses authenticated curl to return a result int based on the value of key "status"
+func Rmqjson(jbody []byte) (result int) {
+	type Rmqcheck struct {
+		Stat string `json:"status"`
+	}
+	result = 0 // explicitly zeroing
+	var rmqcheck Rmqcheck
+	marshalerr := json.Unmarshal(jbody, &rmqcheck)
+	if marshalerr != nil {
+		fmt.Println(marshalerr)
+	}
+	if strings.ToLower(rmqcheck.Stat) != "ok" {
+		result = 2
+	}
+	return result
 }

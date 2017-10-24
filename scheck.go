@@ -20,6 +20,7 @@ var (
 	volSizeCrit    = flag.Float64("volcrit", 90, "Percentage full that triggers a critical")
 	authString     = flag.String("auth", "Z3Vlc3Q6Z3Vlc3Q=", "Curl Auth string. Default parses to guest:guest")
 	neoRole        = flag.String("role", "", "Neo4j Role: master or slave")
+	rmqNodeName    = flag.String("rmqname", "", "node name for RMQ curls")
 )
 
 func main() {
@@ -42,12 +43,11 @@ func main() {
 		roleIsValid, roleErr := validify.Neorole(*neoRole)
 		authIsValid, authErr := validify.Authb64(*authString)
 		var neoIsUp int
-		if roleIsValid && authIsValid {
-			neoIsUp = grab.Checkneo(*hostAddress, *neoRole, *authString)
-		} else {
+		if !roleIsValid || !authIsValid {
 			errorContent := fmt.Sprintf("\n%v\n%v", roleErr, authErr)
 			panic(errorContent)
 		}
+		neoIsUp = grab.Checkneo(*hostAddress, *neoRole, *authString)
 		if neoIsUp == 0 {
 			fmt.Println("OK - Neo4j role is", *neoRole, "as expected")
 		} else {
@@ -66,8 +66,33 @@ func main() {
 		esStatOutput := fmt.Sprintf("status: %v, nodes: %v, unassigned shards: %v", esStatus, esNodes, esUnshards)
 		if esIsUp == 2 {
 			fmt.Println("Crit - warnings are", esStatOutput)
+		} else {
+			fmt.Println("OK -", esStatOutput)
 		}
-		fmt.Println("OK -", esStatOutput)
 		os.Exit(esIsUp)
+	case "rmq":
+		portIsValid, portErr := validify.Port(*portNumber)
+		authIsValid, authErr := validify.Authb64(*authString)
+		var rmqIsUp int
+		if !portIsValid || !authIsValid {
+			errorContent := fmt.Sprintf("\n%v\n%v", portErr, authErr)
+			panic(errorContent)
+		}
+		hostName, _ := os.Hostname()
+		var defaultRmqNodeName string
+		if len(*rmqNodeName) == 0 {
+			defaultRmqNodeName = fmt.Sprintf("rabbit@%v", hostName)
+		} else {
+			defaultRmqNodeName = fmt.Sprintf("rabbit@%v", *rmqNodeName)
+		}
+		rmqTarget := fmt.Sprintf("http://%v:%v/api/healthchecks/node/%v", *hostAddress, *portNumber, defaultRmqNodeName)
+		rBody := grab.Authcurl(rmqTarget, *authString)
+		rmqIsUp = grab.Rmqjson(rBody)
+		if rmqIsUp != 0 {
+			fmt.Println("Crit - rmq status not ok")
+		} else {
+			fmt.Println("OK - rmq status ok")
+		}
+		os.Exit(rmqIsUp)
 	}
 }
