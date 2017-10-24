@@ -13,7 +13,7 @@ func Port(port int) (bool, error) {
 		return false, errors.New("Port out of range")
 
 	}
-	return true, errors.New("port: valid")
+	return true, errors.New("port is valid")
 }
 
 // Neorole just checks that the user input a valid choice. This is just to give a friendly error message

@@ -27,8 +27,8 @@ func main() {
 	flag.Parse()
 	switch *checkType {
 	case "port":
-		_, portErr := validify.Port(*portNumber)
-		if portErr != nil {
+		portIsValid, portErr := validify.Port(*portNumber)
+		if !portIsValid {
 			panic(portErr)
 		}
 		portResult := grab.Checkport(*hostAddress, *portNumber, *timeOutSeconds)
@@ -36,12 +36,19 @@ func main() {
 	case "neo4j":
 		roleIsValid, roleErr := validify.Neorole(*neoRole)
 		authIsValid, authErr := validify.Authb64(*authString)
-		portIsValid, portErr := validify.Port(*portNumber)
-		if roleIsValid && authIsValid && portIsValid {
-			fmt.Println("congrats on hitting submit")
+		var neoIsUp int
+		if roleIsValid && authIsValid {
+			neoIsUp = grab.Checkneo(*hostAddress, *neoRole, *authString)
 		} else {
-			errorContent := fmt.Sprintf("%v\n%v\n%v", roleErr, authErr, portErr)
+			errorContent := fmt.Sprintf("\n%v\n%v", roleErr, authErr)
 			panic(errorContent)
+		}
+		if neoIsUp == 0 {
+			fmt.Println("OK - Neo4j role is", *neoRole, "as expected")
+			os.Exit(neoIsUp)
+		} else {
+			fmt.Println("Critical - Neo4j role is wrong")
+			os.Exit(neoIsUp)
 		}
 	case "elasticsearch":
 		portIsValid, portErr := validify.Port(*portNumber)
