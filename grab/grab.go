@@ -39,13 +39,12 @@ func Checkport(address string, port int, timeout int) (result int) {
 // Checkneo returns a result int
 func Checkneo(address string, role string, auth string) (result int) {
 	result = 0 //explicitly zeroing
-	target := fmt.Sprintf("http://%v:7474/db/manage/server/ha/%v", address, auth)
+	target := fmt.Sprintf("http://%v:7474/db/manage/server/ha/%v", address, role)
 	req, _ := http.NewRequest("GET", target, nil) // I probably should catch an error here, but I don't really care about it right now
 	req.Header.Set("Authorization", auth)
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		result = 2
 	}
 	defer res.Body.Close()
 
