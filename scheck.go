@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jsmonet/goChecks/grab"
+
 	"github.com/jsmonet/goChecks/validify"
 )
 
 var (
 	checkType      = flag.String("type", "", "What kind of check?")
 	hostAddress    = flag.String("host", "", "Enter a host address")
-	portNumber     = flag.Int("port", 22, "Enter a TCP port number")
+	portNumber     = flag.Int("port", 0, "Enter a TCP port number. Leaving this out will throw an exception on checks requiring ports")
 	timeOutSeconds = flag.Int("timeout", 5, "Enter a timeout in seconds")
 	volumeLocation = flag.String("vol", "/", "Enter a volume to check (disk space)")
 	volSizeWarn    = flag.Float64("volwarn", 75, "Percentage full that triggers a warning")
@@ -25,7 +27,12 @@ func main() {
 	flag.Parse()
 	switch *checkType {
 	case "port":
-		validify.Port(*portNumber)
+		_, portErr := validify.Port(*portNumber)
+		if portErr != nil {
+			panic(portErr)
+		}
+		portResult := grab.Checkport(*hostAddress, *portNumber, *timeOutSeconds)
+		os.Exit(portResult)
 	case "neo4j":
 		roleIsValid, roleErr := validify.Neorole(*neoRole)
 		authIsValid, authErr := validify.Authb64(*authString)
@@ -33,10 +40,8 @@ func main() {
 		if roleIsValid && authIsValid && portIsValid {
 			fmt.Println("congrats on hitting submit")
 		} else {
-			fmt.Println(roleErr)
-			fmt.Println(authErr)
-			fmt.Println(portErr)
-			os.Exit(2)
+			errorContent := fmt.Sprintf("%v\n%v\n%v", roleErr, authErr, portErr)
+			panic(errorContent)
 		}
 	case "elasticsearch":
 		portIsValid, portErr := validify.Port(*portNumber)
