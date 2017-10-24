@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -113,4 +114,19 @@ func Rmqjson(jbody []byte) (result int) {
 		result = 2
 	}
 	return result
+}
+
+// Diskuse returns usage stats based on the volume given
+func Diskuse(path string) (cap uint64, used uint64) {
+
+	fs := syscall.Statfs_t{}
+	err := syscall.Statfs(path, &fs)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	cap = fs.Blocks * uint64(fs.Bsize)
+	free := fs.Bfree * uint64(fs.Bsize) // yup, I just did that
+	used = cap - free
+	return cap, used
 }

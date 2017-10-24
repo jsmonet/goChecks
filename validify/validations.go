@@ -35,7 +35,12 @@ func Authb64(authstring string) (bool, error) {
 	return true, errors.New("auth: valid")
 }
 
-// Host just makes sure the host flag isn't empty before moving on
-// func Host(address string) (bool, error) {
-
-// }
+// Percentages returns a bool and error message
+func Percentages(warn int, crit int) (bool, error) {
+	if warn > crit {
+		return false, errors.New("You can't have a warn value greater than your crit value")
+	} else if warn > 99 || crit > 99 {
+		return false, errors.New("One of your values exceeds 99, the highest applicable percentage for this check")
+	}
+	return true, errors.New("")
+}

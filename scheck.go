@@ -16,8 +16,8 @@ var (
 	portNumber     = flag.Int("port", 0, "Enter a TCP port number. Leaving this out will throw an exception on checks requiring ports")
 	timeOutSeconds = flag.Int("timeout", 5, "Enter a timeout in seconds")
 	volumeLocation = flag.String("vol", "/", "Enter a volume to check (disk space)")
-	volSizeWarn    = flag.Float64("volwarn", 75, "Percentage full that triggers a warning")
-	volSizeCrit    = flag.Float64("volcrit", 90, "Percentage full that triggers a critical")
+	volSizeWarn    = flag.Int("volwarn", 75, "Percentage full that triggers a warning")
+	volSizeCrit    = flag.Int("volcrit", 90, "Percentage full that triggers a critical")
 	authString     = flag.String("auth", "Z3Vlc3Q6Z3Vlc3Q=", "Curl Auth string. Default parses to guest:guest")
 	neoRole        = flag.String("role", "", "Neo4j Role: master or slave")
 	rmqNodeName    = flag.String("rmqname", "", "node name for RMQ curls")
@@ -94,5 +94,24 @@ func main() {
 			fmt.Println("OK - rmq status ok")
 		}
 		os.Exit(rmqIsUp)
+	case "disk":
+		percentIsValid, percentErr := validify.Percentages(*volSizeWarn, *volSizeCrit)
+		if !percentIsValid {
+			fmt.Println(percentErr)
+			os.Exit(2)
+		}
+		diskCapacity, diskUsed := grab.Diskuse(*volumeLocation)
+		percentUsed := float64(diskUsed) / float64(diskCapacity) * 100
+		perUsedString := fmt.Sprintf("%.2f%% used", percentUsed)
+		if percentUsed < float64(*volSizeWarn) {
+			fmt.Println("Ok -", perUsedString)
+			os.Exit(0)
+		} else if percentUsed > float64(*volSizeWarn) && percentUsed < float64(*volSizeCrit) {
+			fmt.Println("Warn -", perUsedString)
+			os.Exit(1)
+		} else {
+			fmt.Println("Crit -", perUsedString)
+			os.Exit(2)
+		}
 	}
 }
