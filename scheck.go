@@ -1,6 +1,7 @@
 package main
 
 import "flag"
+import "github.com/jsmonet/goChecks/checkify"
 
 var (
 	checkType      = flag.String("type", "", "What kind of check?")
@@ -16,5 +17,10 @@ var (
 func main() {
 	// Parse for great justice
 	flag.Parse()
+	switch *checkType {
+	case "port":
+		checkify.Port(*portNumber)
+	case "neo4j":
 
+	}
 }
