@@ -1,6 +1,7 @@
 package grab
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -9,6 +10,7 @@ import (
 	"time"
 )
 
+// returns a byte slice from a curl target input
 func CurlAndReturn(target string) []byte {
 	curlTarget, curlErr := http.NewRequest("GET", target, nil)
 	if curlErr != nil {
@@ -54,4 +56,28 @@ func Checkneo(address string, role string, auth string) (result int) {
 		result = 2
 	}
 	return result
+}
+
+// Checkes returns a result int and some strings
+func Elasjson(jbody []byte) (result int, status string, nodes int, unshards int) {
+	type Elascheck struct {
+		Stat     string `json:"status"`
+		Numnodes int    `json:"number_of_nodes"`
+		Unshards int    `json:"unassigned_shards"`
+	}
+	result = 0 //explicitly zeroing
+	var elascheck Elascheck
+	marshalerr := json.Unmarshal(jbody, &elascheck)
+	if marshalerr != nil {
+		result = 2
+	}
+	status = strings.ToLower(elascheck.Stat)
+	nodes = elascheck.Numnodes
+	unshards = elascheck.Unshards
+	if strings.ToLower(elascheck.Stat) == "yellow" {
+		result = 1
+	} else if strings.ToLower(elascheck.Stat) == "red" {
+		result = 2
+	}
+	return result, status, nodes, unshards
 }

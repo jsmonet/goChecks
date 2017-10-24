@@ -32,6 +32,11 @@ func main() {
 			panic(portErr)
 		}
 		portResult := grab.Checkport(*hostAddress, *portNumber, *timeOutSeconds)
+		if portResult == 0 {
+			fmt.Println("OK - port is open")
+		} else {
+			fmt.Println("Crit - port is closed or operation timed out")
+		}
 		os.Exit(portResult)
 	case "neo4j":
 		roleIsValid, roleErr := validify.Neorole(*neoRole)
@@ -45,17 +50,24 @@ func main() {
 		}
 		if neoIsUp == 0 {
 			fmt.Println("OK - Neo4j role is", *neoRole, "as expected")
-			os.Exit(neoIsUp)
 		} else {
 			fmt.Println("Critical - Neo4j role is wrong")
-			os.Exit(neoIsUp)
 		}
+		os.Exit(neoIsUp)
 	case "elasticsearch":
 		portIsValid, portErr := validify.Port(*portNumber)
-		if portIsValid {
-			fmt.Println("hooray, it works")
-		} else {
-			fmt.Println(portErr)
+		var esIsUp int
+		if !portIsValid {
+			panic(portErr)
 		}
+		esTarget := fmt.Sprintf("http://%v:%v/_cluster/health", *hostAddress, *portNumber)
+		esBody := grab.CurlAndReturn(esTarget)
+		esIsUp, esStatus, esNodes, esUnshards := grab.Elasjson(esBody)
+		esStatOutput := fmt.Sprintf("status: %v, nodes: %v, unassigned shards: %v", esStatus, esNodes, esUnshards)
+		if esIsUp == 2 {
+			fmt.Println("Crit - warnings are", esStatOutput)
+		}
+		fmt.Println("OK -", esStatOutput)
+		os.Exit(esIsUp)
 	}
 }
