@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
 )
@@ -137,23 +138,25 @@ func Diskuse(path string) (cap uint64, used uint64) {
 // Procload returns the 1 minute average, 5 minute average as float64's and an int (0, 1, 2) intended for use as an exit code
 // seriously, I'm just taking shirou's excellent lib and adding an exit int var to lazy boat the exit code and
 // keep the main.go file clean...er
-func Procload() (load1 float64, load5 float64, load15 float64, exit int) {
+func Procload() (load1 float64, load5 float64, load15 float64, loadPercentage float64, cores int, exit int) {
 	exit = 0 // explicit zeroing so much
 	loads, _ := load.Avg()
+	cores, _ = cpu.Counts(true)
+	fCores := float64(cores)
 	// basing alerts off 1 minute avg
 	load1 = loads.Load1
 	// these are here to return for a cooler looking output
 	load5 = loads.Load5
 	load15 = loads.Load15
-
-	warnload := 75.00
-	critload := 93.00
-	if load1 > warnload && load1 < critload {
+	loadPercentage = load1 / fCores
+	warnload := 1.1
+	critload := 2.5
+	if loadPercentage > warnload && loadPercentage < critload {
 		exit = 1
-	} else if load1 > critload {
+	} else if loadPercentage > critload {
 		exit = 2
 	}
-	return load1, load5, load15, exit
+	return load1, load5, load15, loadPercentage, cores, exit
 }
 
 // Memload just like Procload just rips off shirou's excellent lib (see imports) for the

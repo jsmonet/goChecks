@@ -114,8 +114,8 @@ func main() {
 			os.Exit(2)
 		}
 	case "load":
-		cpuLoad1, cpuLoad5, cpuLoad15, cpuIsOk := grab.Procload()
-		loadString := fmt.Sprintf("Load: %2.2v%%, %2.2v%%, %2.2v%%", cpuLoad1, cpuLoad5, cpuLoad15)
+		cpuLoad1, cpuLoad5, cpuLoad15, smoothedLoad, numCores, cpuIsOk := grab.Procload()
+		loadString := fmt.Sprintf("Load: %.3v, %.3v, %.3v, with metric based on avg load %.3v across %v cores", cpuLoad1, cpuLoad5, cpuLoad15, smoothedLoad, numCores)
 		var statString string
 		if cpuIsOk == 0 {
 			statString = fmt.Sprintf("OK -")
