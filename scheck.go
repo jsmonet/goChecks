@@ -113,5 +113,32 @@ func main() {
 			fmt.Println("Crit -", perUsedString)
 			os.Exit(2)
 		}
+	case "load":
+		cpuLoad1, cpuLoad5, cpuLoad15, cpuIsOk := grab.Procload()
+		loadString := fmt.Sprintf("Load: %2.2v%%, %2.2v%%, %2.2v%%", cpuLoad1, cpuLoad5, cpuLoad15)
+		var statString string
+		if cpuIsOk == 0 {
+			statString = fmt.Sprintf("OK -")
+		} else if cpuIsOk == 1 {
+			statString = fmt.Sprintf("Warn -")
+		} else if cpuIsOk == 2 {
+			statString = fmt.Sprintf("Crit -")
+		}
+		outString := fmt.Sprintf("%v %v", statString, loadString)
+		fmt.Println(outString)
+		os.Exit(cpuIsOk)
+	case "mem":
+		memPercentUsed, memIsOk := grab.Memload()
+		var statString string
+		memPercentUsedString := fmt.Sprintf("%.4v%% memory used", memPercentUsed)
+		if memIsOk == 0 {
+			statString = fmt.Sprintf("OK -")
+		} else if memIsOk == 1 {
+			statString = fmt.Sprintf("Warn -")
+		} else if memIsOk == 2 {
+			statString = fmt.Sprintf("Crit -")
+		}
+		fmt.Println(statString, memPercentUsedString)
+		os.Exit(memIsOk)
 	}
 }

@@ -9,6 +9,9 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/shirou/gopsutil/load"
+	"github.com/shirou/gopsutil/mem"
 )
 
 // CurlAndReturn returns a byte slice from a curl target input
@@ -129,4 +132,42 @@ func Diskuse(path string) (cap uint64, used uint64) {
 	free := fs.Bfree * uint64(fs.Bsize) // yup, I just did that
 	used = cap - free
 	return cap, used
+}
+
+// Procload returns the 1 minute average, 5 minute average as float64's and an int (0, 1, 2) intended for use as an exit code
+// seriously, I'm just taking shirou's excellent lib and adding an exit int var to lazy boat the exit code and
+// keep the main.go file clean...er
+func Procload() (load1 float64, load5 float64, load15 float64, exit int) {
+	exit = 0 // explicit zeroing so much
+	loads, _ := load.Avg()
+	// basing alerts off 1 minute avg
+	load1 = loads.Load1
+	// these are here to return for a cooler looking output
+	load5 = loads.Load5
+	load15 = loads.Load15
+
+	warnload := 75.00
+	critload := 93.00
+	if load1 > warnload && load1 < critload {
+		exit = 1
+	} else if load1 > critload {
+		exit = 2
+	}
+	return load1, load5, load15, exit
+}
+
+// Memload just like Procload just rips off shirou's excellent lib (see imports) for the
+// purpose of tacking on an exit code (int variable) and wrapping the %-used val
+func Memload() (percentUsed float64, exit int) {
+	exit = 0
+	warnMem := 80.00
+	critMem := 98.00
+	memory, _ := mem.VirtualMemory()
+	percentUsed = memory.UsedPercent
+	if percentUsed > warnMem && percentUsed < critMem {
+		exit = 1
+	} else if percentUsed > critMem {
+		exit = 2
+	}
+	return percentUsed, exit
 }
