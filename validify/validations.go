@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -43,4 +44,13 @@ func Percentages(warn int, crit int) (bool, error) {
 		return false, errors.New("One of your values exceeds 99, the highest applicable percentage for this check")
 	}
 	return true, errors.New("")
+}
+
+// RmqQueueExists grabs a status code and returns a bool, and also doesn't QUITE work the way I want right now
+func RmqQueueExists(target string) (result bool, err error) {
+	res, resErr := http.Get(target)
+	if res.StatusCode != 200 {
+		return false, resErr
+	}
+	return false, resErr
 }

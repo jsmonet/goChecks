@@ -104,7 +104,7 @@ func Elasjson(jbody []byte) (result int, status string, nodes int, unshards int)
 }
 
 // Rmqjson uses authenticated curl to return a result int based on the value of key "status"
-func Rmqjson(jbody []byte) (result int) {
+func Rmqjstat(jbody []byte) (result int) {
 	type Rmqcheck struct {
 		Stat string `json:"status"`
 	}
@@ -118,6 +118,26 @@ func Rmqjson(jbody []byte) (result int) {
 		result = 2
 	}
 	return result
+}
+
+// RmqQueueStat uses authcurl byte slice to check failed queues. I still need to figure out the key to check
+func RmqQueueStat(jBody []byte) (messageCount int, result int) {
+	type QueueFailedCount struct {
+		Count int `json:"messages"` // figure out which of these we need
+	}
+	result = 0 // explicitly zeroing
+	var queueFailedCount QueueFailedCount
+	marshalerr := json.Unmarshal(jBody, &queueFailedCount)
+	if marshalerr != nil {
+		fmt.Println(marshalerr)
+	}
+	messageCount = queueFailedCount.Count
+	if queueFailedCount.Count > 0 && queueFailedCount.Count < 20 {
+		result = 1
+	} else if queueFailedCount.Count > 19 {
+		result = 2
+	}
+	return messageCount, result
 }
 
 // Diskuse returns usage stats based on the volume given

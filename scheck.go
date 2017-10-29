@@ -21,6 +21,7 @@ var (
 	authString     = flag.String("auth", "Z3Vlc3Q6Z3Vlc3Q=", "Curl Auth string. Default parses to guest:guest")
 	neoRole        = flag.String("role", "", "Neo4j Role: master or slave")
 	rmqNodeName    = flag.String("rmqname", "", "node name for RMQ curls")
+	rmqQueueName   = flag.String("queue", "", "Which rabbit queue do you want to check?")
 )
 
 func main() {
@@ -87,13 +88,35 @@ func main() {
 		}
 		rmqTarget := fmt.Sprintf("http://%v:%v/api/healthchecks/node/%v", *hostAddress, *portNumber, defaultRmqNodeName)
 		rBody := grab.Authcurl(rmqTarget, *authString)
-		rmqIsUp = grab.Rmqjson(rBody)
+		rmqIsUp = grab.Rmqjstat(rBody)
 		if rmqIsUp != 0 {
 			fmt.Println("Crit - rmq status not ok")
 		} else {
 			fmt.Println("OK - rmq status ok")
 		}
 		os.Exit(rmqIsUp)
+	case "rmqconsumers":
+		// commenting the validation out for now because technically I don't need it
+		// and technically it doesn't work. not even a little. I'll fix it next.
+		// queueExists, queueExistsErr := validify.RmqQueueExists(*rmqQueueName)
+		// if !queueExists {
+		// 	queueIsOk = 2
+		// 	errorStatement := fmt.Sprintf("Queue doesn't exist. Error output:\n%v", queueExistsErr)
+		// 	fmt.Println(errorStatement)
+		// 	os.Exit(queueIsOk)
+		// }
+		var queueCount, queueIsOk int
+		queueTarget := fmt.Sprintf("http://%v:%v/api/queues/%%2F/%v", *hostAddress, *portNumber, *rmqQueueName)
+		rqBody := grab.Authcurl(queueTarget, *authString)
+		queueCount, queueIsOk = grab.RmqQueueStat(rqBody)
+		if queueIsOk == 1 {
+			fmt.Println("Warn -", *rmqQueueName, "failed count is", queueCount)
+			os.Exit(queueIsOk)
+		} else if queueIsOk == 2 {
+			fmt.Println("Crit -", *rmqQueueName, "failed count is", queueCount)
+		}
+		fmt.Println("OK -", *rmqQueueName, "failed count is", queueCount)
+		os.Exit(queueIsOk)
 	case "disk":
 		percentIsValid, percentErr := validify.Percentages(*volSizeWarn, *volSizeCrit)
 		if !percentIsValid {
