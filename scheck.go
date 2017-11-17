@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"./grab"
+	"github.com/jsmonet/goChecks/grab"
 
-	"./validify"
+	"github.com/jsmonet/goChecks/validify"
 )
 
 var (
