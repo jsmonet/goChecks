@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jsmonet/goChecks/grab"
+	"./grab"
 
-	"github.com/jsmonet/goChecks/validify"
+	"./validify"
 )
 
 var (
@@ -62,7 +62,7 @@ func main() {
 			panic(portErr)
 		}
 		esTarget := fmt.Sprintf("http://%v:%v/_cluster/health", *hostAddress, *portNumber)
-		esBody := grab.CurlAndReturn(esTarget)
+		esBody := grab.CurlAndReturnJson(esTarget)
 		esIsUp, esStatus, esNodes, esUnshards := grab.Elasjson(esBody)
 		esStatOutput := fmt.Sprintf("status: %v, nodes: %v, unassigned shards: %v", esStatus, esNodes, esUnshards)
 		if esIsUp == 2 {
@@ -87,7 +87,7 @@ func main() {
 			defaultRmqNodeName = fmt.Sprintf("rabbit@%v", *rmqNodeName)
 		}
 		rmqTarget := fmt.Sprintf("http://%v:%v/api/healthchecks/node/%v", *hostAddress, *portNumber, defaultRmqNodeName)
-		rBody := grab.Authcurl(rmqTarget, *authString)
+		rBody := grab.AuthcurlJson(rmqTarget, *authString)
 		rmqIsUp = grab.Rmqjstat(rBody)
 		if rmqIsUp != 0 {
 			fmt.Println("Crit - rmq status not ok")
@@ -107,7 +107,7 @@ func main() {
 		// }
 		var queueCount, queueIsOk int
 		queueTarget := fmt.Sprintf("http://%v:%v/api/queues/%%2F/%v", *hostAddress, *portNumber, *rmqQueueName)
-		rqBody := grab.Authcurl(queueTarget, *authString)
+		rqBody := grab.AuthcurlJson(queueTarget, *authString)
 		queueCount, queueIsOk = grab.RmqQueueStat(rqBody)
 		if queueIsOk == 1 {
 			fmt.Println("Warn -", *rmqQueueName, "failed count is", queueCount)

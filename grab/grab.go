@@ -29,6 +29,21 @@ func CurlAndReturn(target string) []byte {
 	return rawCurlBody
 }
 
+// CurlAndReturnJson returns a byte slice from a curl target input. This must only be used to curl JSON content.
+func CurlAndReturnJson(target string) []byte {
+	curlTarget, curlErr := http.NewRequest("GET", target, nil)
+	if curlErr != nil {
+		fmt.Println(curlErr) // really I don't care, but you're welcome to uncomment
+	}
+	curlTarget.Header.Set("Content-Type", "application/json")
+	curlRes, _ := http.DefaultClient.Do(curlTarget)
+	rawCurlBody, _ := ioutil.ReadAll(curlRes.Body)
+
+	defer curlRes.Body.Close()
+
+	return rawCurlBody
+}
+
 // Authcurl returns a byte slice from a curl with authentication
 func Authcurl(target string, auth string) []byte {
 	req, err := http.NewRequest("GET", target, nil)
@@ -37,6 +52,23 @@ func Authcurl(target string, auth string) []byte {
 	}
 	authString := fmt.Sprintf("Basic: %v", auth) // this doesn't jive with how I do neo curl
 	req.Header.Set("Authorization", authString)
+	res, _ := http.DefaultClient.Do(req)
+	rawCurlBody, _ := ioutil.ReadAll(res.Body)
+
+	defer res.Body.Close()
+
+	return rawCurlBody
+}
+
+// AuthcurlJson explicitly sets Content-Type application/json and returns a byte slice from a curl with authentication. This must only be used to curl JSON content.
+func AuthcurlJson(target string, auth string) []byte {
+	req, err := http.NewRequest("GET", target, nil)
+	if err != nil {
+		fmt.Println("req error:", err)
+	}
+	authString := fmt.Sprintf("Basic: %v", auth)
+	req.Header.Set("Authorization", authString)
+	req.Header.Set("Content-Type", "application/json")
 	res, _ := http.DefaultClient.Do(req)
 	rawCurlBody, _ := ioutil.ReadAll(res.Body)
 
