@@ -105,3 +105,34 @@ func TestAuthb64(t *testing.T) {
 		}
 	}
 }
+
+func TestPercentages(t *testing.T) {
+	cases := []struct {
+		testWarn int
+		testCrit int
+		testBool bool
+	}{
+		{
+			testWarn: 85,
+			testCrit: 95,
+			testBool: true,
+		},
+		{
+			testWarn: 85,
+			testCrit: 75,
+			testBool: false,
+		},
+		{
+			testWarn: 75,
+			testCrit: 100,
+			testBool: false,
+		},
+	}
+
+	for _, c := range cases {
+		percentagesBool, _ := Percentages(c.testWarn, c.testCrit)
+		if percentagesBool != c.testBool {
+			t.Errorf("Expected %v, got %v", c.testBool, percentagesBool)
+		}
+	}
+}

@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"net/http"
 	"strings"
 )
 
@@ -36,7 +35,7 @@ func Authb64(authstring string) (bool, error) {
 	return true, errors.New("auth: valid")
 }
 
-// Percentages returns a bool and error message
+// Percentages takes two int values and returns bool + error. The first int is always the "warning" value, the second is always the "critical" value. This feeds a test where you can supply arbitrary percentages between 1 and 99 to denote warning and critical consumption values of a resource. 100+ is invalidated by `else if warn > 99 || crit > 99`
 func Percentages(warn int, crit int) (bool, error) {
 	if warn > crit {
 		return false, errors.New("You can't have a warn value greater than your crit value")
@@ -46,11 +45,4 @@ func Percentages(warn int, crit int) (bool, error) {
 	return true, errors.New("")
 }
 
-// RmqQueueExists grabs a status code and returns a bool, and also doesn't QUITE work the way I want right now
-func RmqQueueExists(target string) (result bool, err error) {
-	res, resErr := http.Get(target)
-	if res.StatusCode != 200 {
-		return false, resErr
-	}
-	return false, resErr
-}
+// removed rmq queue exists checker. I didn't like it and it isn't worth testing. Let it throw a larger exception
