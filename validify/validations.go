@@ -8,16 +8,16 @@ import (
 	"strings"
 )
 
-// Port checks for a valid port number
+// Port requires an int and outputs both a bool as well as error content. This test checks that the int falls within the range of acceptable TCP ports, from 1 to 65535.
 func Port(port int) (bool, error) {
-	if port < 1 || port > 65535 {
+	if port <= 1 || port >= 65535 {
 		return false, errors.New("Port out of range")
 
 	}
 	return true, errors.New("port is valid")
 }
 
-// Neorole just checks that the user input a valid choice. This is just to give a friendly error message
+// Neorole just checks that the user input a valid choice. It case-insensitively checks that the string you feed it contains either 'master' or 'slave'. This pertains specifically to Neo4j HA cluster roles, but not necessarily to Causal cluster roles.
 func Neorole(role string) (bool, error) {
 	lowerCaseRole := strings.ToLower(role)
 	if lowerCaseRole != "master" && lowerCaseRole != "slave" {
