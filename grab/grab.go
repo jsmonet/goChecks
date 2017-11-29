@@ -16,18 +16,19 @@ import (
 )
 
 // CurlAndReturn returns a byte slice from a curl target input
-func CurlAndReturn(target string) []byte {
-	curlTarget, curlErr := http.NewRequest("GET", target, nil)
-	if curlErr != nil {
-		fmt.Println(curlErr) // really I don't care, but you're welcome to uncomment
-	}
-	curlRes, _ := http.DefaultClient.Do(curlTarget)
-	rawCurlBody, _ := ioutil.ReadAll(curlRes.Body)
+// deprecating in favor of CurlAndReturnJson below
+// func CurlAndReturn(target string) []byte {
+// 	curlTarget, curlErr := http.NewRequest("GET", target, nil)
+// 	if curlErr != nil {
+// 		fmt.Println(curlErr) // really I don't care, but you're welcome to uncomment
+// 	}
+// 	curlRes, _ := http.DefaultClient.Do(curlTarget)
+// 	rawCurlBody, _ := ioutil.ReadAll(curlRes.Body)
 
-	defer curlRes.Body.Close()
+// 	defer curlRes.Body.Close()
 
-	return rawCurlBody
-}
+// 	return rawCurlBody
+// }
 
 // CurlAndReturnJson returns a byte slice from a curl target input. This must only be used to curl JSON content.
 func CurlAndReturnJson(target string) []byte {
@@ -45,20 +46,21 @@ func CurlAndReturnJson(target string) []byte {
 }
 
 // Authcurl returns a byte slice from a curl with authentication
-func Authcurl(target string, auth string) []byte {
-	req, err := http.NewRequest("GET", target, nil)
-	if err != nil {
-		fmt.Println("req error:", err)
-	}
-	authString := fmt.Sprintf("Basic: %v", auth) // this doesn't jive with how I do neo curl
-	req.Header.Set("Authorization", authString)
-	res, _ := http.DefaultClient.Do(req)
-	rawCurlBody, _ := ioutil.ReadAll(res.Body)
+// deprecating in favor of AuthcurlJson below
+// func Authcurl(target string, auth string) []byte {
+// 	req, err := http.NewRequest("GET", target, nil)
+// 	if err != nil {
+// 		fmt.Println("req error:", err)
+// 	}
+// 	authString := fmt.Sprintf("Basic: %v", auth) // this doesn't jive with how I do neo curl
+// 	req.Header.Set("Authorization", authString)
+// 	res, _ := http.DefaultClient.Do(req)
+// 	rawCurlBody, _ := ioutil.ReadAll(res.Body)
 
-	defer res.Body.Close()
+// 	defer res.Body.Close()
 
-	return rawCurlBody
-}
+// 	return rawCurlBody
+// }
 
 // AuthcurlJson explicitly sets Content-Type application/json and returns a byte slice from a curl with authentication. This must only be used to curl JSON content.
 func AuthcurlJson(target string, auth string) []byte {
@@ -77,7 +79,11 @@ func AuthcurlJson(target string, auth string) []byte {
 	return rawCurlBody
 }
 
-// Checkport returns an int value to get tossed into os.Exit
+// Checkport returns an int value to get tossed into os.Exit.
+// address is the hostname or IP you wish to poll.
+// port is the TCP port to be polled.
+// timeout is how long, in seconds, to wait before giving up on the poll.
+// result is an int to feed os.Exit(result) in the main scheck program.
 func Checkport(address string, port int, timeout int) (result int) {
 	result = 0 // explicitly zeroing
 	target := fmt.Sprintf("%v:%v", address, port)
