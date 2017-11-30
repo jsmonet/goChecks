@@ -22,11 +22,21 @@ var (
 	neoRole        = flag.String("role", "", "Neo4j Role: master or slave")
 	rmqNodeName    = flag.String("rmqname", "", "node name for RMQ curls")
 	rmqQueueName   = flag.String("queue", "", "Which rabbit queue do you want to check?")
+	printVersion   = flag.Bool("version", false, "Print version and exit")
 )
+
+var version string
 
 func main() {
 	// Parse for great justice
+
 	flag.Parse()
+
+	if *printVersion {
+		fmt.Println(version)
+		os.Exit(0)
+	}
+
 	switch *checkType {
 	case "port":
 		portIsValid, portErr := validify.Port(*portNumber)
@@ -96,15 +106,6 @@ func main() {
 		}
 		os.Exit(rmqIsUp)
 	case "rmqconsumers":
-		// commenting the validation out for now because technically I don't need it
-		// and technically it doesn't work. not even a little. I'll fix it next.
-		// queueExists, queueExistsErr := validify.RmqQueueExists(*rmqQueueName)
-		// if !queueExists {
-		// 	queueIsOk = 2
-		// 	errorStatement := fmt.Sprintf("Queue doesn't exist. Error output:\n%v", queueExistsErr)
-		// 	fmt.Println(errorStatement)
-		// 	os.Exit(queueIsOk)
-		// }
 		var queueCount, queueIsOk int
 		queueTarget := fmt.Sprintf("http://%v:%v/api/queues/%%2F/%v", *hostAddress, *portNumber, *rmqQueueName)
 		rqBody := grab.AuthcurlJson(queueTarget, *authString)

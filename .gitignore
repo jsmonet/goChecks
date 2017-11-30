@@ -15,3 +15,6 @@
 .DS_Store
 scheck
 bin/
+
+# debugger stuff
+launch.json

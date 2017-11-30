@@ -15,21 +15,6 @@ import (
 	"github.com/shirou/gopsutil/mem"
 )
 
-// CurlAndReturn returns a byte slice from a curl target input
-// deprecating in favor of CurlAndReturnJson below
-// func CurlAndReturn(target string) []byte {
-// 	curlTarget, curlErr := http.NewRequest("GET", target, nil)
-// 	if curlErr != nil {
-// 		fmt.Println(curlErr) // really I don't care, but you're welcome to uncomment
-// 	}
-// 	curlRes, _ := http.DefaultClient.Do(curlTarget)
-// 	rawCurlBody, _ := ioutil.ReadAll(curlRes.Body)
-
-// 	defer curlRes.Body.Close()
-
-// 	return rawCurlBody
-// }
-
 // CurlAndReturnJson returns a byte slice from a curl target input. This must only be used to curl JSON content.
 func CurlAndReturnJson(target string) []byte {
 	curlTarget, curlErr := http.NewRequest("GET", target, nil)
@@ -44,23 +29,6 @@ func CurlAndReturnJson(target string) []byte {
 
 	return rawCurlBody
 }
-
-// Authcurl returns a byte slice from a curl with authentication
-// deprecating in favor of AuthcurlJson below
-// func Authcurl(target string, auth string) []byte {
-// 	req, err := http.NewRequest("GET", target, nil)
-// 	if err != nil {
-// 		fmt.Println("req error:", err)
-// 	}
-// 	authString := fmt.Sprintf("Basic: %v", auth) // this doesn't jive with how I do neo curl
-// 	req.Header.Set("Authorization", authString)
-// 	res, _ := http.DefaultClient.Do(req)
-// 	rawCurlBody, _ := ioutil.ReadAll(res.Body)
-
-// 	defer res.Body.Close()
-
-// 	return rawCurlBody
-// }
 
 // AuthcurlJson explicitly sets Content-Type application/json and returns a byte slice from a curl with authentication. This must only be used to curl JSON content.
 func AuthcurlJson(target string, auth string) []byte {
@@ -89,6 +57,7 @@ func Checkport(address string, port int, timeout int) (result int) {
 	target := fmt.Sprintf("%v:%v", address, port)
 	timeOutSeconds := time.Duration(timeout) * time.Second
 	conn, err := net.DialTimeout("tcp", target, timeOutSeconds)
+	// if err != nil {
 	if err != nil {
 		fmt.Println("Crit -", err)
 		result = 2
