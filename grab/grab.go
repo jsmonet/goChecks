@@ -56,13 +56,12 @@ func Checkport(address string, port int, timeout int) (result int) {
 	result = 0 // explicitly zeroing
 	target := fmt.Sprintf("%v:%v", address, port)
 	timeOutSeconds := time.Duration(timeout) * time.Second
-	conn, err := net.DialTimeout("tcp", target, timeOutSeconds)
+	_, err := net.DialTimeout("tcp", target, timeOutSeconds) // threw away conn in conn, err haha conair... just saw that
 	// if err != nil {
 	if err != nil {
-		fmt.Println("Crit -", err)
 		result = 2
 	}
-	conn.Close()
+	// conn.Close() with conn _'d, nothing to close off of
 	return result
 }
 

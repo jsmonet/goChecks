@@ -68,8 +68,8 @@ func TestCheckport(t *testing.T) {
 		},
 		{
 			port:           40025,
-			doesItWork:     true, // to-do: handle the panic in grab.Checkport when you feed it an incorrect port
-			expectedResult: 0,
+			doesItWork:     false, // to-do: handle the panic in grab.Checkport when you feed it an incorrect port
+			expectedResult: 2,
 		},
 	}
 
