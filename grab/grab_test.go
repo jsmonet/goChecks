@@ -38,7 +38,7 @@ func TestCurlAndReturnJson(t *testing.T) {
 		var elastest Elastest
 
 		httpmock.Activate()
-		defer httpmock.DeactivateAndReset()
+
 		// Let's make an elasticsearch endpoint
 		httpmock.RegisterResponder("GET", "http://localhost/health.json", httpmock.NewStringResponder(200, c.jsonResponse))
 
@@ -48,7 +48,7 @@ func TestCurlAndReturnJson(t *testing.T) {
 		if marshallerr != nil {
 			fmt.Println(marshallerr)
 		} // not sure I care about this error yet
-
+		httpmock.DeactivateAndReset()
 		if elastest.Stat != c.expectedStatus {
 			t.Error("Expected %v but got %v", c.expectedStatus, elastest.Stat)
 		}
