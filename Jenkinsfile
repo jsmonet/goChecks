@@ -5,10 +5,10 @@ node {
         }
 
       }
-      ws("${JENKINS_HOME}/jobs/go/src/github/jsmonet/goChecks") {
+      ws("${JENKINS_HOME}/jobs/go/src/github.com/jsmonet/goChecks") {
           withEnv(["GOPATH=${JENKINS_HOME}/jobs/go"]) {
               env.Path="${JENKINS_HOME}/tools/org.jenkinsci.plugins.golang.GolangInstallation/go1.10/bin:${GOPATH}/bin:$PATH"
-        dir("${JENKINS_HOME}/jobs/go/src/github/jsmonet/goChecks"){
+        dir("${JENKINS_HOME}/jobs/go/src/github.com/jsmonet/goChecks"){
           stage('clean out workspce'){
             sh 'rm -rf $WORKSPACE/*'
           }
