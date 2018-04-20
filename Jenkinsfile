@@ -10,7 +10,9 @@ node {
               env.Path="${JENKINS_HOME}/tools/org.jenkinsci.plugins.golang.GolangInstallation/go1.10/bin:${GOPATH}/bin:$PATH"
         dir("${JENKINS_HOME}/jobs/go/src/github.com/jsmonet/goChecks"){
           stage('clean out workspce'){
-            sh 'rm -rf $WORKSPACE/*'
+            sh 'rm -rf ./*'
+            sh 'echo $PWD'
+            sh 'ls -al'
           }
           stage('Checkout'){
               echo 'Check me out'
