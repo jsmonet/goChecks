@@ -5,10 +5,13 @@ node {
         }
 
       }
-      ws("${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}/") {
-          withEnv(["GOPATH=${JENKINS_HOME}/go"]) {
+      ws("${JENKINS_HOME}/jobs/go/src/github/jsmonet/goChecks") {
+          withEnv(["GOPATH=${JENKINS_HOME}/jobs/go"]) {
               env.Path="${JENKINS_HOME}/tools/org.jenkinsci.plugins.golang.GolangInstallation/go1.10/bin:${GOPATH}/bin:$PATH"
-        dir("${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}/"){
+        dir("${JENKINS_HOME}/jobs/go/src/github/jsmonet/goChecks"){
+          stage('clean out workspce'){
+            sh 'rm -rf $WORKSPACE/*'
+          }
           stage('Checkout'){
               echo 'Check me out'
               checkout scm
