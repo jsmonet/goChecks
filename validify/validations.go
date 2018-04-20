@@ -32,7 +32,7 @@ func Authb64(authstring string) (bool, error) {
 	if err != nil {
 		return false, errors.New("String does not decode, please enter a valid base64 auth string")
 	}
-	return true, errors.New("auth: valid")
+	return true, err
 }
 
 // Percentages takes two int values and returns bool + error. The first int is always the "warning" value, the second is always the "critical" value. This feeds a test where you can supply arbitrary percentages between 1 and 99 to denote warning and critical consumption values of a resource. 100+ is invalidated by `else if warn > 99 || crit > 99`
