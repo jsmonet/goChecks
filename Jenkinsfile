@@ -1,6 +1,12 @@
 node {
+      dir("$JENKINS_HOME/go"){
+        if(!fileExists("/")){
+          sh 'mkdir $JENKINS_HOME/go'
+        }
+
+      }
       ws("${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}/") {
-          withEnv(["GOPATH=${JENKINS_HOME}"]) {
+          withEnv(["GOPATH=${JENKINS_HOME}/go"]) {
               env.Path="${JENKINS_HOME}/tools/org.jenkinsci.plugins.golang.GolangInstallation/go1.10/bin:${GOPATH}/bin:$PATH"
         dir("${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}/"){
           stage('Checkout'){
