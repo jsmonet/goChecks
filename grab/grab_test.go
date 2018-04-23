@@ -50,7 +50,7 @@ func TestCurlAndReturnJson(t *testing.T) {
 		} // not sure I care about this error yet
 		httpmock.DeactivateAndReset()
 		if elastest.Stat != c.expectedStatus {
-			t.Error("Expected %v but got %v", c.expectedStatus, elastest.Stat)
+			t.Error("elastest.Stat does not match c.expectedStatus")
 		}
 	}
 }

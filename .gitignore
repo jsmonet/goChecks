@@ -22,3 +22,6 @@ bin/
 
 # debugger stuff
 launch.json
+
+# dep excludes
+vendor/*
