@@ -23,7 +23,7 @@ node {
                 sh 'go get -u github.com/golang/dep/cmd/dep'
                 sh 'go get -u github.com/golang/lint/golint'
                 sh 'go get github.com/tebeka/go2xunit'
-                sh 'go dep ensure'
+                sh 'dep ensure'
             }
             dir("${JENKINS_HOME}/jobs/go/src/github.com/jsmonet/goChecks/grab"){
                 stage('Test grab'){
